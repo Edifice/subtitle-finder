@@ -1,0 +1,69 @@
+@import url('http://fonts.googleapis.com/css?family=Open+Sans:300,400')
+
+primary = rgb(255, 153, 0)
+
+*
+	box-sizing border-box
+	font-weight 300
+	font-family "Open Sans", "Helvetica", "Arial", sans-serif;
+
+html
+body
+	min-height 100%
+	margin 0
+
+body
+	background black
+	background-image none
+	background-position 50% 50%
+	background-size cover
+	background-repeat no-repeat
+
+.main-content
+	margin 0 10px
+
+.box
+	width 100%
+	max-width 520px
+	margin 30px auto 0
+	form
+		width 100%
+		input
+		button
+			width 100%
+			padding 10px
+			line-height 40px
+			
+			outline 0 !important
+			border 1px solid primary
+			
+			color primary
+		input
+			background rgba(0,0,0,0.75)
+			font-size 20px
+		button
+			background primary
+			color black
+			font-size 30px
+			cursor pointer
+			&:hover
+				background darken(primary, 10%)
+	#result
+		background black
+		padding 20px 10px
+		list-style none
+		color primary
+		a
+			color primary
+			a:hover
+			a:focus
+				color darken(primary, 10%)
+
+::-webkit-input-placeholder
+	color darken(primary, 25%)
+:-moz-placeholder
+	color darken(primary, 25%)
+::-moz-placeholder
+	color darken(primary, 25%)
+:-ms-input-placeholder
+	color darken(primary, 25%)
