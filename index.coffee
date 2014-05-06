@@ -1,13 +1,17 @@
-coffee   = require 'coffee-script'
-express  = require 'express'
-logfmt   = require 'logfmt'
-stylus   = require 'stylus'
-nib      = require 'nib'
-fs       = require 'fs'
+coffee    = require 'coffee-script'
+express   = require 'express'
+logfmt    = require 'logfmt'
+stylus    = require 'stylus'
+nib       = require 'nib'
+fs        = require 'fs'
 
-request  = require 'request'
-jsdom    = require 'jsdom'
-Sequence = require('sequence').Sequence
+request   = require 'request'
+jsdom     = require 'jsdom'
+xmlParser = require 'xml2json'
+
+Sequence  = require('sequence').Sequence
+
+languages = require './languages.json'
 
 fs.writeFileSync __dirname + '/public/script/script.js', (coffee.compile(fs.readFileSync __dirname + '/script/script.coffee', 'utf8'))
 
@@ -34,18 +38,20 @@ app.get '/', (req, res) ->
 	}
 	return
 
-app.get '/subtitle-for-:queryString', (req, res)->
+app.get '/:language-subtitle-for-:queryString', (req, res)->
 	title = req.params['queryString']
 	return {} unless title
 	console.log ">> Start processing for '#{title}'"
-	language = 'hun'
 
 	# empty array for found data
-	foundItem = null
 	foundData = []
+	toClient = 
+		backdrop: null
+		subtitles: []
 
 	# converting sting name to object
 	data = fetchName title
+	data.language = req.params['language'] || 'all'
 
 	# starting timer
 	t = Date.now()
@@ -78,7 +84,7 @@ app.get '/subtitle-for-:queryString', (req, res)->
 			else
 				console.log ">> Great, we found #{searchResult[0].Title} (#{searchResult[0].Year}) as a TV show!"
 
-			imdbId = searchResult[0].imdbID
+			data.imdb = imdbId = searchResult[0].imdbID
 			next(imdbId)
 	# get accurate Show details
 	.then (next, imdbId)->
@@ -102,14 +108,55 @@ app.get '/subtitle-for-:queryString', (req, res)->
 		title = data.title.replace /\s/g, '+'
 		# define translated language codes
 		langs =
+			'all': ''
 			'eng': 'Angol'
 			'hun': 'Magyar'
-		language = language.replace oldVal, newVal for oldVal, newVal of langs when oldVal is language
+		_language = data.language.replace oldVal, newVal for oldVal, newVal of langs when oldVal is data.language
 		# creating url
-		url = "http://www.feliratok.info/?search=#{title}&soriSorszam=&nyelv=#{language}&sorozatnev=&sid=&complexsearch=true&knyelv=0&evad=#{data.season}&epizod1=#{data.episode}&cimke=0&minoseg=0&rlsr=0&tab=all"
+		url = "http://www.feliratok.info/?search=#{title}&soriSorszam=&nyelv=#{_language}&sorozatnev=&sid=&complexsearch=true&knyelv=0&evad=#{data.season}&epizod1=#{data.episode}&cimke=0&minoseg=0&rlsr=0&tab=all"
 
-		
 		console.log '>> Start loading page: ' + url
+		request
+			uri: url = encodeURL url
+			timeout: 12000
+		, (error, response, body) ->
+			if error or response.statusCode isnt 200
+				console.log "Error when loading #{url}"
+				next()
+			else
+				console.log '>>>> Page loaded in ' + (Date.now() - t) + ' msec.'
+				
+				jsdom.env body, ["http://code.jquery.com/jquery-git2.min.js"], (err, window) ->
+					console.log '>> Start getting data from HTML file'
+					$ = window.jQuery
+					
+					table = $("table.result")
+
+					$('tr#vilagit', table).each (index)->
+						name = $('.eredeti', @).text()
+
+						episode = '' + data.episode
+						episode = '0' + episode if episode.length is 1
+
+						if name.indexOf(" #{data.season}x#{episode}") > -1
+							subtitle =
+								perfect: false
+								provider: 'feliratok.info'
+								name: name
+								source: url
+								download: 'http://www.feliratok.info' + $('img[src="img/download.png"]', @).parent().attr('href')
+							if name.toLowerCase().indexOf(data.release) > -1
+								subtitle.perfect = true
+							toClient.subtitles.push subtitle
+						
+					next()
+
+	# process opensubtitler.org provider
+	.then (next)->
+		tempImdbId = data.imdb.replace /tt/i, ''
+
+		url = "http://www.opensubtitles.org/en/ssearch/sublanguageid-#{data.language}/searchonlytvseries-on/season-#{data.season}/episode-#{data.episode}/imdbid-#{tempImdbId}/xml"
+		console.log ">> Requesting: #{url}"
 		request
 			uri: url = encodeURL url
 		, (error, response, body) ->
@@ -117,45 +164,58 @@ app.get '/subtitle-for-:queryString', (req, res)->
 				console.log "Error when loading #{url}"
 				return 0
 			
-			console.log '>>>> Page loaded in ' + (Date.now() - t) + ' msec.'
-			
-			jsdom.env body, ["http://code.jquery.com/jquery-git2.min.js"], (err, window) ->
-				console.log '>> Start getting data from HTML file'
-				$ = window.jQuery
-				
-				table = $("table.result")
+			# parse XML
+			xmlData = xmlParser.toJson body, {object: true}
 
-				$('tr#vilagit', table).each (index)->
-					name = $('.eredeti', @).text()
+			results = xmlData.opensubtitles.search.results
+			_link = results.subtitle.EpisodeName.ImdbLink
+			data.epImdb = _link.substr(_link.indexOf('/tt') + 1, 9)
 
-					episode = '' + data.episode
-					episode = '0' + episode if episode.length is 1
+			url = "http://www.opensubtitles.org/en/search/sublanguageid-#{data.language}/imdbid-" + data.epImdb.substr(2) + "/xml"
+			console.log ">> Requesting: #{url}"
+			request
+				uri: encodeURL url
+			, (error, response, body) ->
+				if error or response.statusCode isnt 200
+					console.log "Error when loading #{url}"
+					return 0
 
-					if name.indexOf(" #{data.season}x#{episode}") > -1 and !foundItem?
+				# parse XML
+				xmlData = xmlParser.toJson body, {object: true}
+				results = xmlData.opensubtitles.search.results.subtitle
+
+				for sub in results
+					if sub.IDSubtitle? # some of the nodes are for advertisements, so these doesn't have IDSubtitle parameter
 						subtitle =
-							provider: 'feliratok.info'
-							name: name
-							source: url
-							download: 'http://www.feliratok.info' + $('img[src="img/download.png"]', @).parent().attr('href')
-						if name.toLowerCase().indexOf(data.release) > -1
-							console.log ">> Perfect match: #{name} for ", data
-							foundItem = subtitle
-						foundData.push subtitle
-					
+							perfect: false
+							provider: 'opensubtitles.org'
+							name: sub.MovieReleaseName
+							source: url.replace '/xml', ''
+							download: sub.IDSubtitle.LinkDownload
+						if sub.MovieReleaseName.toLowerCase().indexOf(data.release) > -1
+							subtitle.perfect = true
+						toClient.subtitles.push subtitle
+
 				next()
-	# if feliratok.info found a subtitle, we show it to the User
 	.then (next)->
-		next() if !foundItem? # We only go further, if we couldn't find the desired subtitle
-		
-		res.json foundItem
+		url = "http://api.themoviedb.org/3/find/#{data.imdb}?api_key=8f7c64210ac192e7737d265409ac3ed9&external_source=imdb_id"
+		console.log ">> Requesting: #{url}"
+		request
+			uri: url = encodeURL url
+		, (error, response, body) ->
+			if error or response.statusCode isnt 200
+				console.log "Error when loading #{url}"
+				return 0
 
-	# process opensubtitler.org provider
-	.then (next)->
-		next()
+			_show = JSON.parse(body).tv_results[0]
 
-	# if non of the results were 100% accurate, we show the list of possible subtitles
+			toClient.backdrop = 'http://image.tmdb.org/t/p/original' + _show.backdrop_path
+			
+			next()
+
+	# we show the list of possible subtitles
 	.then (next)->
-		res.json foundData
+		res.json toClient
 	return 
 
 # starting Web-App
@@ -210,6 +270,7 @@ app.listen port, ->
 # Vikings.S02E09.HDTV.XviD-AFG.avi
 # Vikings.S02E09.The.Choice.1080p.WEB-DL.DD5.1.H.264-CtrlHD.mkv
 # Vikings.S02E09.WEB-DL.x264-WLR.mkv
+# Vikings.S02E10.HDTV.x264-2HD.mp4
 # 
 # salem.s01e01.hdtv.x264-2hd.mp4
 # Salem.S01E01.720p.HDTV.X264-DIMENSION.mkv
@@ -234,7 +295,13 @@ fetchName = (name)->
 		'da vincis': 'da vinci\'s'
 
 	data =
+		imdb: 
+			id: ''          # IMDb id of show
+			rating: 0
+			episodeId: ''   # IMDb id of episode
+			episodeRating: 0
 		title: ''
+		language: ''
 		season: 0
 		episode: 0
 		version: ''
