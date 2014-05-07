@@ -2,6 +2,11 @@ extend layout
 block content
 	.box
 		form#searchForm
-			input#fileName(type="text" placeholder="Paste the episode's filename here...")
-			button(type="submit") FindSub!
-		ul#result
+			input#fileName(type="text" placeholder="Vikings.S02E10.HDTV.XviD-AFG.avi" autofocus)
+			button(type="submit")
+			.clearfix
+		#languageSelector(data-value="eng")
+			.selected Language: 
+				span English
+			ul
+	#result

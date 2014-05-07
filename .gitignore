@@ -1,4 +1,4 @@
 node_modules/*
 .vagrant/*
 public/style/*
-public/script/*
+public/script/script.js

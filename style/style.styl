@@ -1,6 +1,7 @@
 @import url('http://fonts.googleapis.com/css?family=Open+Sans:300,400')
+@import 'prefix-free'
 
-primary = rgb(255, 153, 0)
+primary = #ddd
 
 *
 	box-sizing border-box
@@ -11,54 +12,133 @@ html
 body
 	min-height 100%
 	margin 0
+	overflow hidden
 
 body
 	background black
+
+#background
+	position fixed
+	top 0
+	left 0
+	width 100%
+	height 100%
+	z-index -1
+
 	background-image none
-	background-position 50% 50%
+	background-position 50% 0
 	background-size cover
 	background-repeat no-repeat
-	transition background-image 3s
+
+	transition all .5s
+	transform translate3d(0,0,0)
+	
+	-webkit-filter blur(5px)
+	-moz-filter blur(5px)
+	filter blur(5px)
+	filter unquote('alpha(Opacity=20)')
+	opacity .2
 
 .main-content
 	margin 0 10px
 
 .box
 	width 100%
-	max-width 520px
-	margin 30px auto 0
+	max-width 600px
+	margin 80px auto 0
+	
+	@media screen and (min-width: 700px)
+		position absolute
+		left 50px
+		bottom 100px
+		margin none
 	form
 		width 100%
 		input
 		button
-			width 100%
+			float left
+
+			margin 0
 			padding 10px
-			line-height 40px
+			line-height 60px
 			
+			background-color transparent
 			outline 0 !important
-			border 1px solid primary
+			border none
 			
 			color primary
+
+			-webkit-backface-visibility hidden
+			-moz-backface-visibility hidden
+			-ms-backface-visibility hidden
+			box-shadow none
+			-webkit-appearance none
+			&:hover
+			&:focus
+			&:active
+				background-color rgba(primary, .1)
 		input
-			background rgba(0,0,0,0.75)
-			font-size 20px
+			width 85%
+			font-size 30px
 		button
-			background primary
+			width 15%
+			height 80px
+			border-left 1px solid rgba(primary, .5)
 			color black
 			font-size 30px
 			cursor pointer
-			&:hover
-				background darken(primary, 10%)
-	#result
-		background black
-		padding 20px 10px
-		list-style none
+
+			background-image url('/img/icon-search.svg')
+			background-repeat no-repeat
+			background-position 50% 50%
+			background-size 50%
+#result
+	padding 20px 10px
+	list-style none
+	color primary
+	@media screen and (min-width: 700px)
+		margin-left 40px
+	&:empty
+		background none
+	p.hint
+		margin-bottom 0
+	p.hint+p
+		margin-top 0
+	a
+		font-size 1.8em
+		text-decoration none
 		color primary
-		a
-			color primary
-			a:hover
-			a:focus
-				color darken(primary, 10%)
+		a:hover
+		a:focus
+			color darken(primary, 10%)
+
+#languageSelector
+	color primary
+	font-size 1.2em
+	.selected
+		padding 10px
+	ul
+		position fixed
+		top 20px
+		left -700px
+		bottom 20px
+		width 640px
+
+		padding 0
+
+		overflow-y scroll
+		background rgba(0,0,0,.8)
+		list-style none
+		
+		&.active
+			left 50px
+		li
+			padding 10px 20px
+			&:nth-of-type(even)
+				background rgba(0,0,0,.7)
+		small
+			font-size small
+
 
 ::-webkit-input-placeholder
 	color darken(primary, 25%)
@@ -68,3 +148,20 @@ body
 	color darken(primary, 25%)
 :-ms-input-placeholder
 	color darken(primary, 25%)
+
+.clearfix:after
+	content "."
+	display block
+	clear both
+	visibility hidden
+	line-height 0
+	height 0
+
+.clearfix
+	display inline-block
+
+html[xmlns] .clearfix
+	display block
+
+* html .clearfix
+	height 1%

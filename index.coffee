@@ -11,7 +11,7 @@ xmlParser = require 'xml2json'
 
 Sequence  = require('sequence').Sequence
 
-languages = require './languages.json'
+#languages = require './languages.json'
 
 fs.writeFileSync __dirname + '/public/script/script.js', (coffee.compile(fs.readFileSync __dirname + '/script/script.coffee', 'utf8'))
 
@@ -112,44 +112,49 @@ app.get '/:language-subtitle-for-:queryString', (req, res)->
 			'eng': 'Angol'
 			'hun': 'Magyar'
 		_language = data.language.replace oldVal, newVal for oldVal, newVal of langs when oldVal is data.language
-		# creating url
-		url = "http://www.feliratok.info/?search=#{title}&soriSorszam=&nyelv=#{_language}&sorozatnev=&sid=&complexsearch=true&knyelv=0&evad=#{data.season}&epizod1=#{data.episode}&cimke=0&minoseg=0&rlsr=0&tab=all"
 
-		console.log '>> Start loading page: ' + url
-		request
-			uri: url = encodeURL url
-			timeout: 12000
-		, (error, response, body) ->
-			if error or response.statusCode isnt 200
-				console.log "Error when loading #{url}"
-				next()
-			else
-				console.log '>>>> Page loaded in ' + (Date.now() - t) + ' msec.'
-				
-				jsdom.env body, ["http://code.jquery.com/jquery-git2.min.js"], (err, window) ->
-					console.log '>> Start getting data from HTML file'
-					$ = window.jQuery
-					
-					table = $("table.result")
+		if !_language?
+			console.log '>> Not english or hungarian. We skip feliratok.info provider'
+			next()
+		else
+			# creating url
+			url = "http://www.feliratok.info/?search=#{title}&soriSorszam=&nyelv=#{_language}&sorozatnev=&sid=&complexsearch=true&knyelv=0&evad=#{data.season}&epizod1=#{data.episode}&cimke=0&minoseg=0&rlsr=0&tab=all"
 
-					$('tr#vilagit', table).each (index)->
-						name = $('.eredeti', @).text()
-
-						episode = '' + data.episode
-						episode = '0' + episode if episode.length is 1
-
-						if name.indexOf(" #{data.season}x#{episode}") > -1
-							subtitle =
-								perfect: false
-								provider: 'feliratok.info'
-								name: name
-								source: url
-								download: 'http://www.feliratok.info' + $('img[src="img/download.png"]', @).parent().attr('href')
-							if name.toLowerCase().indexOf(data.release) > -1
-								subtitle.perfect = true
-							toClient.subtitles.push subtitle
-						
+			console.log '>> Start loading page: ' + url
+			request
+				uri: url = encodeURL url
+				timeout: 12000
+			, (error, response, body) ->
+				if error or response.statusCode isnt 200
+					console.log "Error when loading #{url}"
 					next()
+				else
+					console.log '>>>> Page loaded in ' + (Date.now() - t) + ' msec.'
+					
+					jsdom.env body, ["http://code.jquery.com/jquery-git2.min.js"], (err, window) ->
+						console.log '>> Start getting data from HTML file'
+						$ = window.jQuery
+						
+						table = $("table.result")
+
+						$('tr#vilagit', table).each (index)->
+							name = $('.eredeti', @).text()
+
+							episode = '' + data.episode
+							episode = '0' + episode if episode.length is 1
+
+							if name.indexOf(" #{data.season}x#{episode}") > -1
+								subtitle =
+									perfect: false
+									provider: 'feliratok.info'
+									name: name
+									source: url
+									download: 'http://www.feliratok.info' + $('img[src="img/download.png"]', @).parent().attr('href')
+								if name.toLowerCase().indexOf(data.release) > -1
+									subtitle.perfect = true
+								toClient.subtitles.push subtitle
+							
+						next()
 
 	# process opensubtitler.org provider
 	.then (next)->
@@ -168,35 +173,40 @@ app.get '/:language-subtitle-for-:queryString', (req, res)->
 			xmlData = xmlParser.toJson body, {object: true}
 
 			results = xmlData.opensubtitles.search.results
-			_link = results.subtitle.EpisodeName.ImdbLink
-			data.epImdb = _link.substr(_link.indexOf('/tt') + 1, 9)
-
-			url = "http://www.opensubtitles.org/en/search/sublanguageid-#{data.language}/imdbid-" + data.epImdb.substr(2) + "/xml"
-			console.log ">> Requesting: #{url}"
-			request
-				uri: encodeURL url
-			, (error, response, body) ->
-				if error or response.statusCode isnt 200
-					console.log "Error when loading #{url}"
-					return 0
-
-				# parse XML
-				xmlData = xmlParser.toJson body, {object: true}
-				results = xmlData.opensubtitles.search.results.subtitle
-
-				for sub in results
-					if sub.IDSubtitle? # some of the nodes are for advertisements, so these doesn't have IDSubtitle parameter
-						subtitle =
-							perfect: false
-							provider: 'opensubtitles.org'
-							name: sub.MovieReleaseName
-							source: url.replace '/xml', ''
-							download: sub.IDSubtitle.LinkDownload
-						if sub.MovieReleaseName.toLowerCase().indexOf(data.release) > -1
-							subtitle.perfect = true
-						toClient.subtitles.push subtitle
-
+			
+			if !results?
+				console.log '>> No match for this query'
 				next()
+			else
+				_link = results.subtitle.EpisodeName.ImdbLink
+				data.epImdb = _link.substr(_link.indexOf('/tt') + 1, 9)
+
+				url = "http://www.opensubtitles.org/en/search/sublanguageid-#{data.language}/imdbid-" + data.epImdb.substr(2) + "/xml"
+				console.log ">> Requesting: #{url}"
+				request
+					uri: encodeURL url
+				, (error, response, body) ->
+					if error or response.statusCode isnt 200
+						console.log "Error when loading #{url}"
+						return 0
+
+					# parse XML
+					xmlData = xmlParser.toJson body, {object: true}
+					results = xmlData.opensubtitles.search.results
+
+					if results?
+						for sub in results.subtitle
+							if sub.IDSubtitle? # some of the nodes are for advertisements, so these doesn't have IDSubtitle parameter
+								subtitle =
+									perfect: false
+									provider: 'opensubtitles.org'
+									name: sub.MovieReleaseName
+									source: url.replace '/xml', ''
+									download: sub.IDSubtitle.LinkDownload
+								if sub.MovieReleaseName.toLowerCase().indexOf(data.release) > -1
+									subtitle.perfect = true
+								toClient.subtitles.push subtitle
+					next()
 	.then (next)->
 		url = "http://api.themoviedb.org/3/find/#{data.imdb}?api_key=8f7c64210ac192e7737d265409ac3ed9&external_source=imdb_id"
 		console.log ">> Requesting: #{url}"

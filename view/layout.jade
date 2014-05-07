@@ -4,15 +4,12 @@ html
 		title #{title} - FindSub
 		link(rel='stylesheet', href='/style/style.css')
 	body
-		script.
-			function refreshBg(){
-				var body = document.getElementsByTagName('body')[0];
-				var imgNum = Math.floor(Math.random() * 41) + 1;
-				body.style.backgroundImage = "url('/img/bg" + imgNum + ".jpg')";
-			}
-			refreshBg();
 		.container
 			.main-content
 				block content
-		script(src="/script/vendor/zepto.js")
+		#background
+		script.
+			document.getElementById('background').style.backgroundImage="url('/img/bg"+(Math.floor(Math.random()*41)+1)+".jpg')";
+		script(src="/script/vendor/jquery.js")
+		script(src="/script/vendor/jquery.cookie.js")
 		script(src="/script/script.js")
