@@ -1,9 +1,23 @@
 {
   "name": "subtitle-finder",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "My project work for AAgents class",
-  "main": "index.js",
-  "author": "Daniel Salamon",
+  "keywords": [
+    "subtitle",
+    "subtitle finder"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Edifice/subtitle-finder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Edifice/subtitle-finder/issues"
+  },
+  "author": {
+    "name": "Daniel Salamon",
+    "email": "salidani@gmail.com"
+  },
+  "main": "index.coffee",
   "license": "ISC",
   "engines": {
     "node": "0.10.x"
