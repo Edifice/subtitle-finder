@@ -1,4 +1,17 @@
 
+trim = (s) ->
+	l = 0
+	r = s.length - 1
+	l++ while l < s.length and s[l] is " "
+	r -= 1  while r > l and s[r] is " "
+	s.substring l, r + 1
+
+uglify = (string)->
+	trim string.toLowerCase().replace /\s/g, '.'
+
+isSame = (a, b)->
+	uglify(a) is uglify(b)
+
 $ ->
 	# seting language by browser's language
 	$.getJSON 'languages.json', (supportedLanguages)->
@@ -62,6 +75,8 @@ $ ->
 				hasIt = true for dat in data when isSame dat.name, sub.name
 				data.push sub if not hasIt
 
+			data = data.slice 0, 8
+
 			$('#result').empty()
 
 			perfects = []
@@ -87,16 +102,4 @@ $ ->
 			$('#background').css('background-image', "url(#{res.backdrop})")
 			
 			console.log res
-
-	isSame = (a, b)->
-		uglify a is uglify b
-
-	uglify = (string)->
-		trim string.toLowerCase().replace /\s/g, '.'
-
-	trim = (s) ->
-		l = 0
-		r = s.length - 1
-		l++ while l < s.length and s[l] is " "
-		r -= 1  while r > l and s[r] is " "
-		s.substring l, r + 1
+	@
