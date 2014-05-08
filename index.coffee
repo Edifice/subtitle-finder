@@ -11,7 +11,7 @@ xmlParser = require 'xml2json'
 
 Sequence  = require('sequence').Sequence
 
-#languages = require './languages.json'
+supportedLanguages = require './public/languages.json'
 
 fs.writeFileSync __dirname + '/public/script/script.js', (coffee.compile(fs.readFileSync __dirname + '/script/script.coffee', 'utf8'))
 
@@ -206,6 +206,58 @@ app.get '/:language-subtitle-for-:queryString', (req, res)->
 								if sub.MovieReleaseName.toLowerCase().indexOf(data.release) > -1
 									subtitle.perfect = true
 								toClient.subtitles.push subtitle
+					next()
+
+	# Podnapisi.net provider
+	.then (next)->
+		# replace spaces
+		title = data.title.replace /\s/g, '+'
+
+		# define translated language codes
+		_language = lang.podnapisi for lang in supportedLanguages when lang.long is data.language
+
+		season = '' + data.season
+		season = '0' + season if season.length is 1
+
+		episode = '' + data.episode
+		episode = '0' + episode if episode.length is 1
+
+		# creating url
+		url = "http://www.sub-titles.net/en/ppodnapisi/search?sK=#{title}+s#{season}e#{episode}&sJ=#{_language}"
+
+		request
+			uri: url = encodeURL url
+			timeout: 12000
+		, (error, response, body) ->
+			if error or response.statusCode isnt 200
+				console.log "Error when loading #{url}"
+				next()
+			else
+				console.log '>>>> Page loaded'
+				
+				jsdom.env body, ["http://code.jquery.com/jquery-git2.min.js"], (err, window) ->
+					console.log '>> Start getting data from HTML file'
+					$ = window.jQuery
+					
+					table = $("table.list")
+
+					$('tr:not(.header)', table).each (index)->
+						name = $('span.opis span[title]', $(@)).attr('title')
+
+						if name? and name isnt ''
+							# on this provider, we only deal with perfect matches
+							if name.toLowerCase().indexOf(data.release) > -1
+								# we get the right title, to avoid showing 5 titles for 1 subtitle
+								finalName = _name for _name in name.toLowerCase().split ' ' when _name.indexOf(data.release) > -1
+
+								subtitle =
+									perfect: true
+									provider: 'feliratok.info'
+									name: finalName
+									source: url
+									download: 'http://www.sub-titles.net' + $('a:first-of-type', $(@)).attr('href')
+								toClient.subtitles.push subtitle
+						
 					next()
 	.then (next)->
 		url = "http://api.themoviedb.org/3/find/#{data.imdb}?api_key=8f7c64210ac192e7737d265409ac3ed9&external_source=imdb_id"

@@ -1,0 +1,261 @@
+[
+	{
+		"int": "Albanian",
+		"native": "gjuha shqipe",
+		"short": "sq",
+		"long": "alb",
+		"podnapisi": 29
+	},{
+		"int": "Arabic",
+		"native": "العربية",
+		"short": "ar",
+		"long": "ara",
+		"podnapisi": 12
+	},{
+		"int": "Belarusian",
+		"native": "беларуская мова",
+		"short": "be",
+		"long": "bel",
+		"podnapisi": 50
+	},{
+		"int": "Bengali",
+		"native": "বাংলা",
+		"short": "bn",
+		"long": "ben",
+		"podnapisi": 59
+	},{
+		"int": "Bosnian",
+		"native": "bosanski jezik",
+		"short": "bs",
+		"long": "bos",
+		"podnapisi": 10
+	},{
+		"int": "Bulgarian",
+		"native": "български език",
+		"short": "bg",
+		"long": "bul",
+		"podnapisi": 33
+	},{
+		"int": "Catalan",
+		"native": "català",
+		"short": "ca",
+		"long": "cat",
+		"podnapisi": 53
+	},{
+		"int": "Chinese",
+		"native": "中文",
+		"short": "zh",
+		"long": "chi",
+		"podnapisi": 17
+	},{
+		"int": "Croatian",
+		"native": "hrvatski jezik",
+		"short": "hr",
+		"long": "hrv",
+		"podnapisi": 38
+	},{
+		"int": "Czech",
+		"native": "čeština",
+		"short": "cs",
+		"long": "cze",
+		"podnapisi": 7
+	},{
+		"int": "Danish",
+		"native": "dansk",
+		"short": "da",
+		"long": "dan",
+		"podnapisi": 24
+	},{
+		"int": "Dutch",
+		"native": "Nederlands, Vlaams",
+		"short": "nl",
+		"long": "dut",
+		"podnapisi": 23
+	},{
+		"int": "English",
+		"native": "English",
+		"short": "en",
+		"long": "eng",
+		"podnapisi": 2
+	},{
+		"int": "Estonian",
+		"native": "eesti, eesti keel",
+		"short": "et",
+		"long": "est",
+		"podnapisi": 20
+	},{
+		"int": "Finnish",
+		"native": "suomi, suomen kieli",
+		"short": "fi",
+		"long": "fin",
+		"podnapisi": 31
+	},{
+		"int": "French",
+		"native": "français",
+		"short": "fr",
+		"long": "fre",
+		"podnapisi": 8
+	},{
+		"int": "German",
+		"native": "Deutsch",
+		"short": "de",
+		"long": "ger",
+		"podnapisi": 5
+	},{
+		"int": "Hebrew",
+		"native": "עברית",
+		"short": "he",
+		"long": "heb",
+		"podnapisi": 22
+	},{
+		"int": "Hindi",
+		"native": "हिन्दी, हिंदी",
+		"short": "hi",
+		"long": "hin",
+		"podnapisi": 42
+	},{
+		"int": "Hungarian",
+		"native": "magyar",
+		"short": "hu",
+		"long": "hun",
+		"podnapisi": 15
+	},{
+		"int": "Indonesian",
+		"native": "Bahasa Indonesia",
+		"short": "id",
+		"long": "ind",
+		"podnapisi": 54
+	},{
+		"int": "Italian",
+		"native": "italiano",
+		"short": "it",
+		"long": "ita",
+		"podnapisi": 9
+	},{
+		"int": "Japanese",
+		"native": "日本語 (にほんご)",
+		"short": "ja",
+		"long": "jpn",
+		"podnapisi": 11
+	},{
+		"int": "Kazakh",
+		"native": "қазақ тілі",
+		"short": "kk",
+		"long": "kaz",
+		"podnapisi": 58
+	},{
+		"int": "Korean",
+		"native": "한국어, 조선어",
+		"short": "ko",
+		"long": "kor",
+		"podnapisi": 4
+	},{
+		"int": "Latvian",
+		"native": "latviešu valoda",
+		"short": "lv",
+		"long": "lav",
+		"podnapisi": 21
+	},{
+		"int": "Lithuanian",
+		"native": "lietuvių kalba",
+		"short": "lt",
+		"long": "lit",
+		"podnapisi": 19
+	},{
+		"int": "Macedonian",
+		"native": "македонски јазик",
+		"short": "mk",
+		"long": "mac",
+		"podnapisi": 35
+	},{
+		"int": "Malay",
+		"native": "bahasa Melayu, بهاس ملايو‎",
+		"short": "ms",
+		"long": "may",
+		"podnapisi": 55
+	},{
+		"int": "Norwegian",
+		"native": "Norsk",
+		"short": "no",
+		"long": "nor",
+		"podnapisi": 3
+	},{
+		"int": "Polish",
+		"native": "język polski, polszczyzna",
+		"short": "pl",
+		"long": "pol",
+		"podnapisi": 26
+	},{
+		"int": "Portuguese",
+		"native": "português",
+		"short": "pt",
+		"long": "por",
+		"podnapisi": 32
+	},{
+		"int": "Romanian",
+		"native": "limba română",
+		"short": "ro",
+		"long": "rum",
+		"podnapisi": 13
+	},{
+		"int": "Russian",
+		"native": "русский язык",
+		"short": "ru",
+		"long": "rus",
+		"podnapisi": 27
+	},{
+		"int": "Sinhala, Sinhalese",
+		"native": "සිංහල",
+		"short": "si",
+		"long": "sin",
+		"podnapisi": 56
+	},{
+		"int": "Slovak",
+		"native": "slovenčina",
+		"short": "sk",
+		"long": "slo",
+		"podnapisi": 37
+	},{
+		"int": "Slovene",
+		"native": "slovenski jezik",
+		"short": "sl",
+		"long": "slv",
+		"podnapisi": 1
+	},{
+		"int": "Spanish, Castilian",
+		"native": "español",
+		"short": "es",
+		"long": "spa",
+		"podnapisi": 28
+	},{
+		"int": "Swedish",
+		"native": "Svenska",
+		"short": "sv",
+		"long": "swe",
+		"podnapisi": 25
+	},{
+		"int": "Thai",
+		"native": "ไทย",
+		"short": "th",
+		"long": "tha",
+		"podnapisi": 44
+	},{
+		"int": "Turkish",
+		"native": "Türkçe",
+		"short": "tr",
+		"long": "tur",
+		"podnapisi": 30
+	},{
+		"int": "Ukrainian",
+		"native": "українська мова",
+		"short": "uk",
+		"long": "ukr",
+		"podnapisi": 46
+	},{
+		"int": "Vietnamese",
+		"native": "Tiếng Việt",
+		"short": "vi",
+		"long": "vie",
+		"podnapisi": 51
+	}
+]
